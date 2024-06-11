@@ -12,11 +12,11 @@
     </parent>
 
     <groupId>inser.spring</groupId>
-    <artifactId>oath2_example</artifactId>
+    <artifactId>oauth2_example</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>oath2_example</name>
+    <name>oauth2_example</name>
     <description>Oath2 Example with Mysql</description>
 
     <properties>
