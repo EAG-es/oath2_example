@@ -13,13 +13,13 @@ VALUES
 		('ROLE_admin'),('ROLE_editor'),('ROLE_operator');
 
   INSERT INTO permission_role (PERMISSION_ID, ROLE_ID) VALUES
-     (1,1), /*create-> admin */
-     (2,1), /* read admin */
-     (3,1), /* update admin */
-     (4,1), /* delete admin */
-     (2,2),  /* read Editor */
-     (3,2),  /* update Editor */
-     (2,3);   /* read operator */
+     (1,1), /* create_profile ROLE_admin */
+     (2,1), /* read_profile   ROLE_admin */
+     (3,1), /* update_profile ROLE_admin */
+     (4,1), /* delete_profile ROLE_admin */
+     (2,2), /* read_profile   ROLE_editor */
+     (3,2), /* update_profile ROLE_editor */
+     (2,3); /* read_profile   ROLE_operator */
 
 
  insert into user (id, username,password, email, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked) VALUES ('1', 'admin','{bcrypt}$2a$12$xVEzhL3RTFP1WCYhS4cv5ecNZIf89EnOW4XQczWHNB/Zi4zQAnkuS', 'noemail@mail.com', '1', '1', '1', '1');
@@ -28,7 +28,7 @@ VALUES
  /*
  passowrds:
  admin - admin
- ahasan - ahasan
+ editor - editor
  user - user
  */
 
@@ -36,5 +36,5 @@ VALUES
 INSERT INTO role_user (role_id, user_id)
     VALUES
     (1, 1), /* admin-admin */
-    (2, 2); /* ahasan-editor */
+    (2, 2); /* editor-editor */
     

@@ -10,12 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import inser.spring.oath2_example.entity.Oauth_client_detailsEntity;
+import static inser.spring.oath2_example.entity.Role.k_role_admin;
 import inser.spring.oath2_example.repository.Oauth_client_detailsRepository;
 import java.io.File;
 import java.util.ResourceBundle;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
@@ -36,8 +35,37 @@ public class Oauth_client_detailsService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private Oauth_client_detailsRepository Oauth_client_detailsRepository;
-    
+    public Oauth_client_detailsRepository Oauth_client_detailsRepository;
+
+    public boolean check_permits(String role_name, Oks ok, Object ... extras_array) throws Exception {
+        ResourceBundle in;
+        in = ResourceBundles.getBundle(k_in_route);
+        try {
+            if (oauth_userDetailsService.oauth_userDetail.isAccountNonExpired() == false) {
+                ok.setTxt(Tr.in(in, "Account expired."));
+                return false;
+            }
+            if (oauth_userDetailsService.oauth_userDetail.isAccountNonLocked() == false) {
+                ok.setTxt(Tr.in(in, "Account locked."));
+                return false;
+            }
+            boolean is_found = false;
+            String lowercase = role_name.toLowerCase();
+            for (var role: oauth_userDetailsService.oauth_userDetail.getRoles()) {
+                if (role.getName().toLowerCase().equals(lowercase)) {
+                    is_found = true;
+                    break;
+                }
+            }
+            if (is_found == false) {
+                ok.setTxt(Tr.in(in, "User does not have the role required."));
+            }
+        } catch (Exception e) {
+            ok.setTxt(e);
+        }
+        return ok.is;
+    }
+
     /**
      * 
      * @param ouath_client_detailsDTO
@@ -52,13 +80,15 @@ public class Oauth_client_detailsService {
         in = ResourceBundles.getBundle(k_in_route);
         try {
             Oauth_client_detailsEntity oauth_client_detailsEntity = null;
-            try {
-                oauth_client_detailsEntity = copyOauth_client_detailsDtoToEntity(ouath_client_detailsDTO, ok);
+            if (check_permits(k_role_admin, ok)) {
+                try {
+                    oauth_client_detailsEntity = copyOauth_client_detailsDtoToEntity(ouath_client_detailsDTO, ok);
+                } catch (DataIntegrityViolationException ex) {
+                    ok.setTxt(ex);
+                }
                 if (ok.is == false) { return null; }
                 Oauth_client_detailsRepository.save(oauth_client_detailsEntity);
                 retorno = oauth_client_detailsEntity.getClient_id() + Tr.in(in, " saved");
-            } catch (DataIntegrityViolationException ex) {
-                ok.setTxt(ex);
             }
         } catch (Exception e) {
             ok.setTxt(e);
@@ -78,11 +108,13 @@ public class Oauth_client_detailsService {
         ResourceBundle in;
         in = ResourceBundles.getBundle(k_in_route);
         try {
-            if (Oauth_client_detailsRepository.existsById(id)) {
-                Oauth_client_detailsRepository.deleteById(id);
-                retorno = id + Tr.in(in, " deleted");
-            } else {
-                ok.setTxt(Tr.in(in, "Record not found ") + id);
+            if (check_permits(k_role_admin, ok)) {
+                if (Oauth_client_detailsRepository.existsById(id)) {
+                    Oauth_client_detailsRepository.deleteById(id);
+                    retorno = id + Tr.in(in, " deleted");
+                } else {
+                    ok.setTxt(Tr.in(in, "Record not found ") + id);
+                }
             }
         } catch (Exception e) {
             ok.setTxt(e);
